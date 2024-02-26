@@ -2,9 +2,33 @@ package com.sigpwned.smartcrop4j.impl;
 
 import static com.sigpwned.smartcrop4j.util.Validation.requirePositive;
 
+import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
 public class ImageData {
+
+  /**
+   * Creates an ImageData from the given BufferedImage. A pixel format of
+   * BufferedImage.TYPE_INT_ARGB is preferred but not required. The float values are in the range
+   * [0, 255].
+   *
+   * @param image The BufferedImage to convert
+   * @return The ImageData
+   */
+  public static ImageData fromBufferedImage(BufferedImage image) {
+    int width = image.getWidth();
+    int height = image.getHeight();
+    float[] data = new float[width * height * PIXEL_STRIDE];
+    int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
+    for (int i = 0; i < pixels.length; i++) {
+      int pixel = pixels[i];
+      data[i * PIXEL_STRIDE + RO] = (float) ((pixel >>> 16) & 0xff);
+      data[i * PIXEL_STRIDE + GO] = (float) ((pixel >>> 8) & 0xff);
+      data[i * PIXEL_STRIDE + BO] = (float) ((pixel >>> 0) & 0xff);
+      data[i * PIXEL_STRIDE + AO] = (float) ((pixel >>> 24) & 0xff);
+    }
+    return new ImageData(width, height, data);
+  }
 
   public static final int PIXEL_STRIDE = 4;
   public static final int RO = 0;

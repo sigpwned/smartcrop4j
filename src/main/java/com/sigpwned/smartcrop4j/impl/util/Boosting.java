@@ -13,18 +13,18 @@ public final class Boosting {
 
   private static final int PIXEL_STRIDE = MoreImageData.PIXEL_STRIDE;
 
-  private static final int BO = MoreImageData.BO;
+  private static final int AO = MoreImageData.AO;
 
   /**
-   * Boosts the blue channel of the given image in the given rectangle by the given weight. The
-   * boosted blue channel is clamped to the range [0, 255].
+   * Boosts the alpha channel of the given image in the given rectangle by the given weight. The
+   * boosted alpha channel is clamped to the range [0, 255].
    *
    * @param o      The image to boost
    * @param x      The x-coordinate of the top-left corner of the rectangle to boost
    * @param y      The y-coordinate of the top-left corner of the rectangle to boost
    * @param width  The width of the rectangle to boost
    * @param height The height of the rectangle to boost
-   * @param weight The weight to boost the blue channel by
+   * @param weight The weight to boost the alpha channel by
    */
   public static void boost(ImageData o, int x, int y, int width, int height, float weight) {
     int wi = o.width;
@@ -36,7 +36,7 @@ public final class Boosting {
     for (int yi = y0; yi < y1; yi++) {
       for (int xi = x0; xi < x1; xi++) {
         var i = (yi * wi + xi) * PIXEL_STRIDE;
-        o.data[i + BO] = MoreMath.clamp(o.data[i + BO] + w, 0.0f, 255.0f);
+        o.data[i + AO] = MoreMath.clamp(o.data[i + AO] + w, 0.0f, 255.0f);
       }
     }
   }

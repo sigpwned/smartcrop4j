@@ -1,5 +1,10 @@
 package com.sigpwned.smartcrop4j.impl;
 
+import static java.util.Collections.*;
+
+import com.sigpwned.smartcrop4j.CropBoost;
+import java.util.List;
+
 public class DefaultSmartCropperConfiguration {
 
   private final int width = 0;
@@ -11,7 +16,7 @@ public class DefaultSmartCropperConfiguration {
   /**
    * [ 0.78, 0.57, 0.44 ]
    */
-  private final float[] skinColor = new float[]{ 0.78f, 0.57f, 0.44f };
+  private final float[] skinColor = new float[]{0.78f, 0.57f, 0.44f};
   private final float skinBias = 0.01f;
   private final float skinBrightnessMin = 0.2f;
   private final float skinBrightnessMax = 1.0f;
@@ -33,6 +38,7 @@ public class DefaultSmartCropperConfiguration {
   private final float outsideImportance = -0.5f;
   private final float boostWeight = 100.0f;
   private final boolean ruleOfThirds = true;
+  private List<CropBoost> boosts = emptyList();
   private final boolean prescale = true;
   // private final  imageOperations;
   // private final canvasFactory;
@@ -44,18 +50,6 @@ public class DefaultSmartCropperConfiguration {
 
   public int getHeight() {
     return height;
-  }
-
-  public float getAspect() {
-    return aspect;
-  }
-
-  public int getCropWidth() {
-    return cropWidth;
-  }
-
-  public int getCropHeight() {
-    return cropHeight;
   }
 
   public float getDetailWeight() {
@@ -146,11 +140,7 @@ public class DefaultSmartCropperConfiguration {
     return ruleOfThirds;
   }
 
-  public boolean isPrescale() {
-    return prescale;
-  }
-
-  public boolean isDebug() {
-    return debug;
+  public List<CropBoost> getBoosts() {
+    return boosts;
   }
 }

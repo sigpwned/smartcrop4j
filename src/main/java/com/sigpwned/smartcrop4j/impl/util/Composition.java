@@ -1,5 +1,7 @@
 package com.sigpwned.smartcrop4j.impl.util;
 
+import com.sigpwned.smartcrop4j.Crop;
+
 /**
  * Heuristics for photo composition, because there are good and bad ways to compose a photo.
  */
@@ -8,68 +10,98 @@ public final class Composition {
   private Composition() {
   }
 
-  public static final float RULE_OF_THIRDS_WEIGHT = 16.0f;
+  /**
+   * Controls how tall and wide the bell curve is for the rule of thirds heuristic, and how quickly
+   * it falls off.
+   */
+  private static final float RULE_OF_THIRDS_SENSITIVITY = 16.0f;
 
   /**
-   * <p>
-   * The rule of thirds is a principle in photography and visual arts that suggests that an image
-   * should be divided into nine equal parts by two equally spaced horizontal lines and two equally
-   * spaced vertical lines. Important compositional elements should be placed along these lines or
-   * at their intersections to create more tension, energy, and interest in the composition compared
-   * to simply centering the subject.
+   * Calculates a heuristic value for alignment with the rule of thirds. This function evaluates how
+   * closely a given point (x) aligns with the rule of thirds, returning a higher value for points
+   * closer to the thirds lines (1/3 and 2/3) and lower values for points further away. The function
+   * uses a bell-shaped curve that peaks at the thirds lines and decreases quadratically with
+   * distance from these points.
    *
-   * <p>
-   * This method provides a heuristic designed to quantify how well a particular point (given by its
-   * x coordinate) aligns with the rule of thirds. The function manipulates the x coordinate in a
-   * way that likely aims to give higher values (closer to 1) when x is near the thirds (either 1/3
-   * or 2/3 of the way across the frame), and lower values (closer to 0) as x moves away from these
-   * points. Step-by-step:
-   *
-   * <ol>
-   * <li>
-   * x - 1.0f / 3.0f + 1.0f: This shifts the x value so that one of the thirds (specifically, the
-   * 1/3 mark) is moved to the origin (0 point), and then adds 1 to ensure the value is positive.
-   * </li>
-   * <li>
-   * ((... % 2.0f) * 0.5f - 0.5f): The modulo operation with 2 ensures that the result wraps around
-   * every 2 units, creating a repeating pattern. This is scaled down by 0.5 and then shifted by
-   * -0.5 to center the peak of the pattern at 0. The pattern repeats every 2 units, so there will
-   * be peaks at positions corresponding to the rule of thirds (1/3 and 2/3) due to the initial
-   * shift and wrap-around effect.
-   * </li>
-   * <li>
-   * * 16.0f: This scales the pattern up, increasing the sensitivity of the function around the
-   * thirds. The weight is somewhat arbitrary and can be adjusted based on how sharply the
-   * function should penalize deviations from the rule of thirds. Experimentally, 16.0f seems to
-   * work well.
-   * </li>
-   * <li>
-   * Math.max(1.0f - x * x, 0.0f): Finally, the function squares the scaled value (increasing the
-   * penalty for being away from the thirds), subtracts it from 1 (inverting the curve so that
-   * values near the thirds are higher), and ensures that the result is not negative (using Math.max
-   * with 0).
-   * </li>
-   * </ol>
-   *
-   * <p>
-   * In essence, this function is designed to produce a bell-shaped curve that peaks at points
-   * corresponding to the rule of thirds, and the curve's width and height are manipulated through
-   * the scaling and shifting operations. The closer an element is to a third, the higher the
-   * heuristic value returned by the function, with the value decreasing quadratically as the
-   * element moves away from the third.
-   *
-   * <p>
-   * This heuristic could be used in image cropping algorithms to score potential crops based on how
-   * well they align with the rule of thirds, favoring compositions where important elements are
-   * near these thirds lines.
-   *
-   * @param x The coordinate of the point to evaluate.
-   * @param w The weight to apply. Experimentally, 16.0f is a good value.
-   * @return A float value representing the heuristic score for the given coordinate, where 1.0 is a
-   * perfect score (on a third) and 0.0 is the worst score (far from a third).
+   * @param x The normalized position of a point within a frame, where 0 <= x <= 1.
+   * @return A heuristic value indicating the alignment with the rule of thirds, where 1 is
+   * perfectly aligned, and 0 indicates no alignment.
    */
-  public static float thirds(float x, float w) {
-    x = (((x - 1.0f / 3.0f + 1.0f) % 2.0f) * 0.5f - 0.5f) * w;
-    return Math.max(1.0f - x * x, 0.0f);
+  public static float evaluateRuleOfThirds(float x) {
+    // Step 1: Shift 'x' so that the 1/3 mark aligns with 0
+    float shiftedX = x - 1.0f / 3.0f;
+
+    // Step 2: Add 1 to ensure the value is positive (necessary for the modulo operation)
+    float positiveShiftedX = shiftedX + 1.0f;
+
+    // Step 3: Apply modulo 2 to create a repeating pattern every 2 units
+    float wrappedX = positiveShiftedX % 2.0f;
+
+    // Step 4: Scale and shift the wrapped value to center the peak of the bell curve at 0
+    // The '* 0.5f' scales the pattern down, and the '- 0.5f' shifts the peak to 0
+    float shiftedAndWrappedX = (wrappedX * 0.5f) - 0.5f;
+
+    // Step 5: Scale the pattern to increase sensitivity around the thirds
+    float scaledX = shiftedAndWrappedX * RULE_OF_THIRDS_SENSITIVITY;
+
+    // Step 6: Apply a quadratic function to create a bell-shaped curve that peaks at the thirds
+    // and ensure the result is non-negative
+    float heuristicValue = Math.max(1.0f - scaledX * scaledX, 0.0f);
+
+    return heuristicValue;
+  }
+
+  /**
+   * Calculates the importance of a specific point within a given crop area, taking into account
+   * factors such as distance from the edges, and adherence to the rule of thirds. Points outside
+   * the crop area are assigned a specified importance value.
+   *
+   * @param crop              The crop area within which the importance of the point is evaluated.
+   * @param x                 The x-coordinate of the point.
+   * @param y                 The y-coordinate of the point.
+   * @param outsideImportance The importance value assigned to points outside the crop area.
+   * @param edgeRadius        The radius within which the edge effect starts influencing the
+   *                          importance.
+   * @param edgeWeight        The weight given to the distance from the edge in the importance
+   *                          calculation.
+   * @param ruleOfThirds      A boolean indicating whether the rule of thirds should be considered
+   *                          in the calculation.
+   * @return The calculated importance of the point, with considerations for edge proximity and the
+   * rule of thirds.
+   */
+  public static float calculateImportance(Crop crop, int x, int y, float outsideImportance,
+      float edgeRadius, float edgeWeight, boolean ruleOfThirds) {
+    // Check if the point is outside the crop area
+    if (!crop.contains(x, y)) {
+      return outsideImportance;
+    }
+
+    // Normalize the coordinates relative to the crop area
+    float normalizedX = (x - crop.getX()) / (float) crop.getWidth();
+    float normalizedY = (y - crop.getY()) / (float) crop.getHeight();
+
+    // Calculate proximity to the center, scaled to [0, 1]
+    float proximityToCenterX = Math.abs(0.5f - normalizedX) * 2.0f;
+    float proximityToCenterY = Math.abs(0.5f - normalizedY) * 2.0f;
+
+    // Calculate the weighted distance from the edge, considering the edge radius
+    float distanceFromEdgeX = Math.max(proximityToCenterX - 1.0f + edgeRadius, 0.0f);
+    float distanceFromEdgeY = Math.max(proximityToCenterY - 1.0f + edgeRadius, 0.0f);
+    float edgeDistanceImportance =
+        (distanceFromEdgeX * distanceFromEdgeX + distanceFromEdgeY * distanceFromEdgeY)
+            * edgeWeight;
+
+    // Base importance score, inversely related to distance from the center
+    float baseImportance = 1.41f - (float) Math.sqrt(
+        proximityToCenterX * proximityToCenterX + proximityToCenterY * proximityToCenterY);
+
+    // Adjust the importance based on the rule of thirds, if applicable
+    if (ruleOfThirds) {
+      baseImportance += Math.max(0.0f, baseImportance + edgeDistanceImportance + 0.5f) * 1.2f * (
+          evaluateRuleOfThirds(proximityToCenterX) + evaluateRuleOfThirds(proximityToCenterY));
+    }
+
+    // Total importance combines base importance and edge distance importance
+    return baseImportance + edgeDistanceImportance;
   }
 }

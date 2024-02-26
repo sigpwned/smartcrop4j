@@ -18,13 +18,19 @@ public final class MoreImageData {
 
   public static final int AO = ImageData.AO;
 
-  public static ImageData scaled(ImageData input, float factor) {
-    final int ifactor = (int) Math.floor(factor);
+  /**
+   * Scales down the image by the indicated constant integer factor.
+   *
+   * @param input  the input image
+   * @param factor the factor to scale down by
+   * @return the scaled down image
+   */
+  public static ImageData scaledDown(ImageData input, int factor) {
     final float[] idata = input.data;
     final int iwidth = input.width;
     final int iheight = input.height;
-    final int owidth = (int) Math.max(Math.floor(iwidth / factor), 1.0);
-    final int oheight = (int) Math.max(Math.floor(iheight / factor), 1.0);
+    final int owidth = Math.max(iwidth / factor, 1);
+    final int oheight = Math.max(iheight / factor, 1);
     final float[] odata = new float[owidth * oheight * ImageData.PIXEL_STRIDE];
     final float ifactor2 = 1.0f / (factor * factor);
 
@@ -41,8 +47,8 @@ public final class MoreImageData {
         float mg = 0.0f;
         float mb = 0.0f;
 
-        for (int v = 0; v < ifactor; v++) {
-          for (int u = 0; u < ifactor; u++) {
+        for (int v = 0; v < factor; v++) {
+          for (int u = 0; u < factor; u++) {
             int j = ((y * factor + v) * iwidth + (x * factor + u)) * PIXEL_STRIDE;
 
             float rj = idata[j + RO];
@@ -74,7 +80,7 @@ public final class MoreImageData {
 
   /**
    * Computes the luma, or brightness, of the indicated pixel.
-   * 
+   *
    * @see Colorspaces#brightness(float, float, float)
    */
   public static float brightness(ImageData image, int pos) {

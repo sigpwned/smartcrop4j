@@ -22,7 +22,7 @@ public final class SkinColoring {
 
   /**
    * Computes the similarity of the hues in the original image to a reference skin color and stores
-   * the result in the red channel of the output image.
+   * the result in the red channel of the output image. Output domain is [0, 255].
    *
    * @param i                 Input image
    * @param o                 Output image

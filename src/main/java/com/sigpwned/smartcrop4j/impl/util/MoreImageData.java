@@ -79,7 +79,8 @@ public final class MoreImageData {
   }
 
   /**
-   * Computes the luma, or brightness, of the indicated pixel.
+   * Computes the luma, or brightness, of the indicated pixel. Output domain matches image color
+   * domain.
    *
    * @see Colorspaces#brightness(float, float, float)
    */

@@ -1,18 +1,13 @@
 package com.sigpwned.smartcrop4j.impl;
 
-import static java.util.Collections.*;
-
-import com.sigpwned.smartcrop4j.CropBoost;
-import java.util.List;
+import java.awt.RenderingHints;
 
 public class DefaultSmartCropperConfiguration {
 
-  private final int width = 0;
-  private final int height = 0;
-  private final float aspect = 0.0f;
-  private final int cropWidth = 0;
-  private final int cropHeight = 0;
+  public static final DefaultSmartCropperConfiguration DEFAULT = new DefaultSmartCropperConfiguration();
+
   private final float detailWeight = 0.2f;
+
   /**
    * [ 0.78, 0.57, 0.44 ]
    */
@@ -29,7 +24,7 @@ public class DefaultSmartCropperConfiguration {
   private final float saturationWeight = 0.1f;
   // Step * minscale rounded down to the next power of two should be good
   private final int scoreDownSample = 8;
-  private final int step = 8;
+  private final int cropSearchStep = 8;
   private final float scaleStep = 0.1f;
   private final float minScale = 1.0f;
   private final float maxScale = 1.0f;
@@ -38,18 +33,13 @@ public class DefaultSmartCropperConfiguration {
   private final float outsideImportance = -0.5f;
   private final float boostWeight = 100.0f;
   private final boolean ruleOfThirds = true;
-  private List<CropBoost> boosts = emptyList();
   private final boolean prescale = true;
-  // private final  imageOperations;
-  // private final canvasFactory;
+  private final int prescaleSize = 256;
+  private final Object prescaleAlgorithm = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
   private final boolean debug = false;
 
-  public int getWidth() {
-    return width;
-  }
 
-  public int getHeight() {
-    return height;
+  public DefaultSmartCropperConfiguration() {
   }
 
   public float getDetailWeight() {
@@ -104,8 +94,8 @@ public class DefaultSmartCropperConfiguration {
     return scoreDownSample;
   }
 
-  public int getStep() {
-    return step;
+  public int getCropSearchStep() {
+    return cropSearchStep;
   }
 
   public float getScaleStep() {
@@ -140,7 +130,19 @@ public class DefaultSmartCropperConfiguration {
     return ruleOfThirds;
   }
 
-  public List<CropBoost> getBoosts() {
-    return boosts;
+  public boolean isPrescale() {
+    return prescale;
+  }
+
+  public boolean isDebug() {
+    return debug;
+  }
+
+  public int getPrescaleSize() {
+    return prescaleSize;
+  }
+
+  public Object getPrescaleAlgorithm() {
+    return prescaleAlgorithm;
   }
 }

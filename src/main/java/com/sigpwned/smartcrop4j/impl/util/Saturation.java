@@ -21,7 +21,7 @@ public final class Saturation {
 
   /**
    * Computes the saturation of the input image and writes the result to the blue channel of the
-   * output image.
+   * output image. Output domain is [0, 255].
    *
    * @param i
    * @param o

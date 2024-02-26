@@ -1,6 +1,13 @@
 package com.sigpwned.smartcrop4j.impl.util;
 
+import static com.sigpwned.smartcrop4j.util.Validation.requireNonNegative;
+import static com.sigpwned.smartcrop4j.util.Validation.requirePositive;
+import static java.util.Objects.requireNonNull;
+
 import com.sigpwned.smartcrop4j.Crop;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Heuristics for photo composition, because there are good and bad ways to compose a photo.
@@ -69,8 +76,14 @@ public final class Composition {
    * @return The calculated importance of the point, with considerations for edge proximity and the
    * rule of thirds.
    */
-  public static float calculateImportance(Crop crop, int x, int y, float outsideImportance,
+  public static float calculatePointImportance(Crop crop, int x, int y, float outsideImportance,
       float edgeRadius, float edgeWeight, boolean ruleOfThirds) {
+    // Validate our inputs
+    crop = requireNonNull(crop);
+    x = requireNonNegative(x);
+    y = requireNonNegative(y);
+    edgeRadius = requireNonNegative(edgeRadius);
+
     // Check if the point is outside the crop area
     if (!crop.contains(x, y)) {
       return outsideImportance;
@@ -103,5 +116,63 @@ public final class Composition {
 
     // Total importance combines base importance and edge distance importance
     return baseImportance + edgeDistanceImportance;
+  }
+
+  /**
+   * Generates a list of potential crop areas within an image, based on specified dimensions and
+   * scale factors. Crops are generated at varying scales and positions, ensuring a comprehensive
+   * search space for optimal cropping.
+   *
+   * @param imageWidth     The width of the original image.
+   * @param imageHeight    The height of the original image.
+   * @param cropWidth      The base width for crop areas before scaling.
+   * @param cropHeight     The base height for crop areas before scaling.
+   * @param minCropScale   The minimum scale factor to apply to crop dimensions.
+   * @param maxCropScale   The maximum scale factor to apply to crop dimensions.
+   * @param cropSearchStep The step size to use when moving the crop area across the image, for both
+   *                       x and y directions.
+   * @return A list of {@link Crop} objects representing potential crop areas within the image.
+   */
+  public static List<Crop> generateCandidateCrops(int imageWidth, int imageHeight, int cropWidth,
+      int cropHeight, float minCropScale, float maxCropScale, float cropScaleStep,
+      int cropSearchStep) {
+    // Validate our inputs
+    imageWidth = requirePositive(imageWidth);
+    imageHeight = requirePositive(imageHeight);
+    cropWidth = requirePositive(cropWidth);
+    cropHeight = requirePositive(cropHeight);
+    if (cropWidth > imageWidth || cropHeight > imageHeight) {
+      throw new IllegalArgumentException("Crop dimensions must be smaller than image dimensions");
+    }
+    minCropScale = requirePositive(minCropScale);
+    maxCropScale = requirePositive(maxCropScale);
+    if (maxCropScale < minCropScale) {
+      throw new IllegalArgumentException(
+          "Max crop scale must be greater than or equal to min crop scale");
+    }
+    cropSearchStep = requirePositive(cropSearchStep);
+
+    List<Crop> result = new ArrayList<>();
+
+    // Iterate over possible scales, starting from the maximum, and decrementing by the crop search step size.
+    for (float scale = maxCropScale; scale >= minCropScale; scale -= cropScaleStep) {
+      int scaledWidth = (int) (cropWidth * scale);
+      int scaledHeight = (int) (cropHeight * scale);
+
+      // Skip scales that result in a zero dimension for either width or height.
+      if (scaledWidth == 0 || scaledHeight == 0) {
+        continue;
+      }
+
+      // Generate crops at this scale, covering the image area by moving the top-left corner of the crop.
+      for (int y = 0; y + scaledHeight <= imageHeight; y += cropSearchStep) {
+        for (int x = 0; x + scaledWidth <= imageWidth; x += cropSearchStep) {
+          result.add(new Crop(x, y, scaledWidth, scaledHeight));
+        }
+      }
+    }
+
+    // Return the list of crop candidates, ensuring it cannot be modified.
+    return Collections.unmodifiableList(result);
   }
 }

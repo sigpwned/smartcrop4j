@@ -63,4 +63,22 @@ public class ImageData {
       this.data = new float[width * height * PIXEL_STRIDE];
     }
   }
+
+  /**
+   * Converts the ImageData to a BufferedImage. Assumes the float values are in the range [0, 255].
+   */
+  public BufferedImage toBufferedImage() {
+    BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    int[] pixels = new int[width * height];
+    for (int i = 0; i < pixels.length; i++) {
+      int pos = i * PIXEL_STRIDE;
+      int r = Math.min(255, Math.max(0, Math.round(data[pos + RO])));
+      int g = Math.min(255, Math.max(0, Math.round(data[pos + GO])));
+      int b = Math.min(255, Math.max(0, Math.round(data[pos + BO])));
+      int a = 255; //Math.min(255, Math.max(0, Math.round(data[pos + AO])));
+      pixels[i] = (a << 24) | (r << 16) | (g << 8) | (b << 0);
+    }
+    result.setRGB(0, 0, width, height, pixels, 0, width);
+    return result;
+  }
 }

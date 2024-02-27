@@ -12,7 +12,7 @@ Given a `BufferedImage`, `smartcrop4j` considers the following heuristics to rec
 * Edge detection
 * Regions of high saturation
 * Regions rich in skin-like colors
-* [Rule of thirds](https://en.wikipedia.org/wiki/Rule_of_thirds)
+* Composition best practices, e.g., [Rule of thirds](https://en.wikipedia.org/wiki/Rule_of_thirds)
 
 ## Quickstart
 

@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -54,7 +54,7 @@ public final class Composition {
    * value's alignment with the rule of thirds. A value of 1 indicates perfect alignment, and 0
    * indicates no alignment.
    *
-   * @param x The normalized position of a point within a frame, where 0 <= x <= 1.
+   * @param x The normalized position of a point within a frame, x is in the range [0, 1].
    * @return A heuristic value indicating the alignment with the rule of thirds, where 1 is
    * perfectly aligned, and 0 indicates no alignment.
    */

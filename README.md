@@ -18,14 +18,22 @@ Given a `BufferedImage`, `smartcrop4j` considers the following heuristics to rec
 
 To produce a crop of an image of a given width and height with the default configuration, simply use:
 
-    public BufferedImage crop(BufferedImage originalImage, int cropWidth, int cropHeight) {
-        return Smartcrop.crop(originalImage, width, height);
-    }
+    BufferedImage croppedImage=Smartcrop.crop(originalImage, cropWidth, cropHeight);
 
 This will cause the system to choose a crop of the appropriate aspect ratio and then copy the result to a new image, possibly scaling the cropped area up or down depending on the image and crop sizes.
 
 To load an image from a file, crop it, and store the result in a new file with the same image type, all using the default configuration, use:
 
-    public File crop(File imageFile, int cropWidth, int cropHeight) throws IOException {
-        Smartcrop.crop(imageFile, cropWidth, cropHeight);
+    File croppedFile=Smartcrop.crop(imageFile, cropWidth, cropHeight);
+    try {
+        // Do some work...
     }
+    finally {
+        croppedFile.delete();
+    }
+
+To boost the importance of an area of the image for the purposes of crop selection, for example to incorporate information from face detection or object labeling, use:
+
+    BufferedImage croppedImage=Smartcrop.crop(originalImage, cropWidth, cropHeight, List.of(
+        new CropBoost(firstBoostX, firstBoostY, firstBoostWidth, firstBoostHeight, 1.0f),
+        new CropBoost(secondBoostX, secondBoostY, secondBoostWidth, secondBoostHeight, 0.5f)));

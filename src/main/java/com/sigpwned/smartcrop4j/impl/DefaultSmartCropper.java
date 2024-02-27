@@ -59,7 +59,7 @@ public class DefaultSmartCropper implements SmartCropper {
   private final float edgeWeight;
   private final float outsideImportance;
   private final float boostWeight;
-  private final boolean ruleOfThirds;
+  private final float ruleOfThirdsWeight;
   private final boolean prescale;
   private final int prescaleSize;
   private final Object prescaleAlgorithm;
@@ -96,7 +96,7 @@ public class DefaultSmartCropper implements SmartCropper {
     this.edgeWeight = requireFinite(builder.getEdgeWeight());
     this.outsideImportance = requireFinite(builder.getOutsideImportance());
     this.boostWeight = requireFinite(builder.getBoostWeight());
-    this.ruleOfThirds = builder.isRuleOfThirds();
+    this.ruleOfThirdsWeight = builder.getRuleOfThirdsWeight();
     this.prescale = builder.isPrescale();
     this.prescaleSize = requirePositive(builder.getPrescaleSize());
     this.prescaleAlgorithm = requireNonNull(builder.getPrescaleAlgorithm());
@@ -191,8 +191,8 @@ public class DefaultSmartCropper implements SmartCropper {
     return boostWeight;
   }
 
-  public boolean isRuleOfThirds() {
-    return ruleOfThirds;
+  public float getRuleOfThirdsWeight() {
+    return ruleOfThirdsWeight;
   }
 
   public boolean isPrescale() {
@@ -372,7 +372,7 @@ public class DefaultSmartCropper implements SmartCropper {
           final int dsp = (dsy * outputWidth + dsx) * PIXEL_STRIDE;
 
           final float ospImportance = Composition.calculatePointImportance(c, osx, osy,
-              getOutsideImportance(), getEdgeRadius(), getEdgeWeight(), isRuleOfThirds());
+              getOutsideImportance(), getEdgeRadius(), getEdgeWeight(), getRuleOfThirdsWeight());
 
           final float dspDetail = od[dsp + GO] / 255.0f;
 

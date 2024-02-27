@@ -26,15 +26,15 @@ public final class Colorspaces {
    * normalized second RGB color vector. The similarity score is inversely related to this distance,
    * with a score closer to 1 indicating higher similarity.
    *
-   * @param r1 The red component of the first RGB color vector, which must be part of a unit length
-   *           vector.
-   * @param g1 The green component of the first RGB color vector, which must be part of a unit
-   *           length vector.
-   * @param b1 The blue component of the first RGB color vector, which must be part of a unit length
-   *           vector.
-   * @param r2 The red component of the second RGB color vector.
-   * @param g2 The green component of the second RGB color vector.
-   * @param b2 The blue component of the second RGB color vector.
+   * @param refr  The red component of the first RGB color vector, which must be part of a unit
+   *              length vector.
+   * @param refg  The green component of the first RGB color vector, which must be part of a unit
+   *              length vector.
+   * @param refb  The blue component of the first RGB color vector, which must be part of a unit
+   *              length vector.
+   * @param sampr The red component of the second RGB color vector.
+   * @param sampg The green component of the second RGB color vector.
+   * @param sampb The blue component of the second RGB color vector.
    * @return A float value representing the similarity between the two RGB colors, where 1.0
    * indicates identical hues and a value closer to 0 indicates more dissimilarity.
    */

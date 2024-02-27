@@ -27,7 +27,7 @@ public class DefaultSmartCropperTest {
 
     assertThat(
         new int[]{crop.getTopCrop().getX(), crop.getTopCrop().getY(), crop.getTopCrop().getWidth(),
-            crop.getTopCrop().getHeight()}, is(new int[]{32, 8, 229, 229}));
+            crop.getTopCrop().getHeight()}, is(new int[]{40, 0, 229, 229}));
   }
 
   @Test
@@ -39,7 +39,7 @@ public class DefaultSmartCropperTest {
 
     assertThat(
         new int[]{crop.getTopCrop().getX(), crop.getTopCrop().getY(), crop.getTopCrop().getWidth(),
-            crop.getTopCrop().getHeight()}, is(new int[]{0, 8, 344, 171}));
+            crop.getTopCrop().getHeight()}, is(new int[]{0, 32, 344, 171}));
   }
 
   @Test
@@ -51,7 +51,7 @@ public class DefaultSmartCropperTest {
 
     assertThat(
         new int[]{crop.getTopCrop().getX(), crop.getTopCrop().getY(), crop.getTopCrop().getWidth(),
-            crop.getTopCrop().getHeight()}, is(new int[]{48, 0, 114, 229}));
+            crop.getTopCrop().getHeight()}, is(new int[]{56, 0, 114, 229}));
   }
 
   @Test
@@ -64,7 +64,7 @@ public class DefaultSmartCropperTest {
 
     assertThat(
         new int[]{crop.getTopCrop().getX(), crop.getTopCrop().getY(), crop.getTopCrop().getWidth(),
-            crop.getTopCrop().getHeight()}, is(new int[]{32, 8, 229, 229}));
+            crop.getTopCrop().getHeight()}, is(new int[]{40, 0, 229, 229}));
   }
 
   @Test
@@ -77,7 +77,7 @@ public class DefaultSmartCropperTest {
 
     assertThat(
         new int[]{crop.getTopCrop().getX(), crop.getTopCrop().getY(), crop.getTopCrop().getWidth(),
-            crop.getTopCrop().getHeight()}, is(new int[]{120, 0, 229, 229}));
+            crop.getTopCrop().getHeight()}, is(new int[]{152, 0, 229, 229}));
   }
 
   @Test
@@ -90,7 +90,7 @@ public class DefaultSmartCropperTest {
 
     assertThat(
         new int[]{crop.getTopCrop().getX(), crop.getTopCrop().getY(), crop.getTopCrop().getWidth(),
-            crop.getTopCrop().getHeight()}, is(new int[]{40, 0, 255, 255}));
+            crop.getTopCrop().getHeight()}, is(new int[]{48, 24, 229, 229}));
   }
 
   @Test
@@ -103,7 +103,7 @@ public class DefaultSmartCropperTest {
 
     assertThat(
         new int[]{crop.getTopCrop().getX(), crop.getTopCrop().getY(), crop.getTopCrop().getWidth(),
-            crop.getTopCrop().getHeight()}, is(new int[]{120, 16, 229, 229}));
+            crop.getTopCrop().getHeight()}, is(new int[]{152, 0, 229, 229}));
   }
 
   @Test(expected = IllegalArgumentException.class)

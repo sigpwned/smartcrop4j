@@ -25,7 +25,7 @@ public class DefaultSmartCropperBuilder {
   private float edgeWeight = -20.0f;
   private float outsideImportance = -0.5f;
   private float boostWeight = 100.0f;
-  private boolean ruleOfThirds = true;
+  private float ruleOfThirdsWeight = 5.0f;
   private boolean prescale = true;
   private int prescaleSize = 256;
   private Object prescaleAlgorithm = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
@@ -56,7 +56,7 @@ public class DefaultSmartCropperBuilder {
     setEdgeWeight(that.getEdgeWeight());
     setOutsideImportance(that.getOutsideImportance());
     setBoostWeight(that.getBoostWeight());
-    setRuleOfThirds(that.isRuleOfThirds());
+    setRuleOfThirdsWeight(that.getRuleOfThirdsWeight());
     setPrescale(that.isPrescale());
     setPrescaleSize(that.getPrescaleSize());
     setPrescaleAlgorithm(that.getPrescaleAlgorithm());
@@ -147,8 +147,8 @@ public class DefaultSmartCropperBuilder {
     return boostWeight;
   }
 
-  public boolean isRuleOfThirds() {
-    return ruleOfThirds;
+  public float getRuleOfThirdsWeight() {
+    return ruleOfThirdsWeight;
   }
 
   public boolean isPrescale() {
@@ -272,8 +272,8 @@ public class DefaultSmartCropperBuilder {
     return this;
   }
 
-  public DefaultSmartCropperBuilder setRuleOfThirds(boolean ruleOfThirds) {
-    this.ruleOfThirds = ruleOfThirds;
+  public DefaultSmartCropperBuilder setRuleOfThirdsWeight(float ruleOfThirdsWeight) {
+    this.ruleOfThirdsWeight = ruleOfThirdsWeight;
     return this;
   }
 

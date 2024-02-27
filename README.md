@@ -1,4 +1,4 @@
-# smartcrop4j
+# smartcrop4j [![tests](https://github.com/sigpwned/smartcrop4j/actions/workflows/tests.yml/badge.svg)](https://github.com/sigpwned/smartcrop4j/actions/workflows/tests.yml)
 
 Content-aware image cropping for Java 11+ based on the excellent [@jwagner/smartcrop.js](https://github.com/jwagner/smartcrop.js).
 

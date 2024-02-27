@@ -12,6 +12,15 @@ public class CropBoost {
   private final int height;
   private final float weight;
 
+  /**
+   * Create a new crop boost.
+   *
+   * @param x      the x-coordinate of the region to boost
+   * @param y      the y-coordinate of the region to boost
+   * @param width  the width of the region to boost
+   * @param height the height of the region to boost
+   * @param weight the weight of the boost, 0.0 to 1.0
+   */
   public CropBoost(int x, int y, int width, int height, float weight) {
     this.x = requireNonNegative(x);
     this.y = requireNonNegative(y);

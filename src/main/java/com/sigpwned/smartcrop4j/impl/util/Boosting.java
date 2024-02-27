@@ -25,9 +25,6 @@ public final class Boosting {
    */
   public static void applyBoosts(ImageData o, List<CropBoost> boosts) {
     // TODO What on earth is this doing? Bug?
-    for (int i = 0; i < o.data.length; i += PIXEL_STRIDE) {
-      o.data[i + AO] = 0;
-    }
     for (CropBoost boost : boosts) {
       applyBoost(o, boost);
     }

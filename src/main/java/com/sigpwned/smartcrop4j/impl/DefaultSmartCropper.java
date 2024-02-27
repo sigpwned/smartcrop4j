@@ -1,8 +1,6 @@
 package com.sigpwned.smartcrop4j.impl;
 
-import static com.sigpwned.smartcrop4j.util.Validation.requireFinite;
 import static com.sigpwned.smartcrop4j.util.Validation.requirePositive;
-import static com.sigpwned.smartcrop4j.util.Validation.requireUnit;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
@@ -16,7 +14,6 @@ import com.sigpwned.smartcrop4j.impl.util.MoreImageData;
 import com.sigpwned.smartcrop4j.impl.util.Saturation;
 import com.sigpwned.smartcrop4j.impl.util.SkinColoring;
 import com.sigpwned.smartcrop4j.util.BufferedImages;
-import com.sigpwned.smartcrop4j.util.Validation;
 import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,190 +22,14 @@ import java.util.Optional;
 
 public class DefaultSmartCropper implements SmartCropper {
 
-  public static DefaultSmartCropperBuilder builder() {
-    return new DefaultSmartCropperBuilder();
+  private final DefaultSmartCropperOptions options;
+
+  public DefaultSmartCropper() {
+    this(DefaultSmartCropperOptions.create());
   }
 
-  public static DefaultSmartCropper create() {
-    return builder().buildDefaultSmartCropper();
-  }
-
-  private final float detailWeight;
-
-  /**
-   * [ 0.78, 0.57, 0.44 ]
-   */
-  private final float[] skinColor;
-  private final float skinBias;
-  private final float skinBrightnessMin;
-  private final float skinBrightnessMax;
-  private final float skinThreshold;
-  private final float skinWeight;
-  private final float saturationBrightnessMin;
-  private final float saturationBrightnessMax;
-  private final float saturationThreshold;
-  private final float saturationBias;
-  private final float saturationWeight;
-  // Step * minscale rounded down to the next power of two should be good
-  private final int scoreDownSample;
-  private final int cropSearchStep;
-  private final float scaleStep;
-  private final float minScale;
-  private final float maxScale;
-  private final float edgeRadius;
-  private final float edgeWeight;
-  private final float outsideImportance;
-  private final float boostWeight;
-  private final float ruleOfThirdsWeight;
-  private final boolean prescale;
-  private final int prescaleSize;
-  private final Object prescaleAlgorithm;
-  private final boolean debug;
-
-  /* default */ DefaultSmartCropper(DefaultSmartCropperBuilder builder) {
-    this.detailWeight = requireFinite(builder.getDetailWeight());
-    this.skinColor = Validation.requireUnitColor(requireNonNull(builder.getSkinColor()));
-    this.skinBias = requireFinite(builder.getSkinBias());
-    this.skinBrightnessMin = requireUnit(builder.getSkinBrightnessMin());
-    this.skinBrightnessMax = requireUnit(builder.getSkinBrightnessMax());
-    if (getSkinBrightnessMin() > getSkinBrightnessMax()) {
-      throw new IllegalArgumentException("skinBrightnessMin > skinBrightnessMax");
-    }
-    this.skinThreshold = requireFinite(builder.getSkinThreshold());
-    this.skinWeight = requireFinite(builder.getSkinWeight());
-    this.saturationBrightnessMin = requireUnit(builder.getSaturationBrightnessMin());
-    this.saturationBrightnessMax = requireUnit(builder.getSaturationBrightnessMax());
-    if (getSaturationBrightnessMin() > getSaturationBrightnessMax()) {
-      throw new IllegalArgumentException("saturationBrightnessMin > saturationBrightnessMax");
-    }
-    this.saturationThreshold = requireFinite(builder.getSaturationThreshold());
-    this.saturationBias = requireFinite(builder.getSaturationBias());
-    this.saturationWeight = requireFinite(builder.getSaturationWeight());
-    this.scoreDownSample = requirePositive(builder.getScoreDownSample());
-    this.cropSearchStep = requirePositive(builder.getCropSearchStep());
-    this.scaleStep = requirePositive(builder.getScaleStep());
-    this.minScale = requireUnit(builder.getMinScale());
-    this.maxScale = requireUnit(builder.getMaxScale());
-    if (getMinScale() > getMaxScale()) {
-      throw new IllegalArgumentException("minScale > maxScale");
-    }
-    this.edgeRadius = requirePositive(builder.getEdgeRadius());
-    this.edgeWeight = requireFinite(builder.getEdgeWeight());
-    this.outsideImportance = requireFinite(builder.getOutsideImportance());
-    this.boostWeight = requireFinite(builder.getBoostWeight());
-    this.ruleOfThirdsWeight = builder.getRuleOfThirdsWeight();
-    this.prescale = builder.isPrescale();
-    this.prescaleSize = requirePositive(builder.getPrescaleSize());
-    this.prescaleAlgorithm = requireNonNull(builder.getPrescaleAlgorithm());
-    this.debug = builder.isDebug();
-  }
-
-  public DefaultSmartCropperBuilder toBuilder() {
-    return new DefaultSmartCropperBuilder(this);
-  }
-
-  public float getDetailWeight() {
-    return detailWeight;
-  }
-
-  public float[] getSkinColor() {
-    return skinColor;
-  }
-
-  public float getSkinBias() {
-    return skinBias;
-  }
-
-  public float getSkinBrightnessMin() {
-    return skinBrightnessMin;
-  }
-
-  public float getSkinBrightnessMax() {
-    return skinBrightnessMax;
-  }
-
-  public float getSkinThreshold() {
-    return skinThreshold;
-  }
-
-  public float getSkinWeight() {
-    return skinWeight;
-  }
-
-  public float getSaturationBrightnessMin() {
-    return saturationBrightnessMin;
-  }
-
-  public float getSaturationBrightnessMax() {
-    return saturationBrightnessMax;
-  }
-
-  public float getSaturationThreshold() {
-    return saturationThreshold;
-  }
-
-  public float getSaturationBias() {
-    return saturationBias;
-  }
-
-  public float getSaturationWeight() {
-    return saturationWeight;
-  }
-
-  public int getScoreDownSample() {
-    return scoreDownSample;
-  }
-
-  public int getCropSearchStep() {
-    return cropSearchStep;
-  }
-
-  public float getScaleStep() {
-    return scaleStep;
-  }
-
-  public float getMinScale() {
-    return minScale;
-  }
-
-  public float getMaxScale() {
-    return maxScale;
-  }
-
-  public float getEdgeRadius() {
-    return edgeRadius;
-  }
-
-  public float getEdgeWeight() {
-    return edgeWeight;
-  }
-
-  public float getOutsideImportance() {
-    return outsideImportance;
-  }
-
-  public float getBoostWeight() {
-    return boostWeight;
-  }
-
-  public float getRuleOfThirdsWeight() {
-    return ruleOfThirdsWeight;
-  }
-
-  public boolean isPrescale() {
-    return prescale;
-  }
-
-  public int getPrescaleSize() {
-    return prescaleSize;
-  }
-
-  public Object getPrescaleAlgorithm() {
-    return prescaleAlgorithm;
-  }
-
-  public boolean isDebug() {
-    return debug;
+  public DefaultSmartCropper(DefaultSmartCropperOptions options) {
+    this.options = requireNonNull(options);
   }
 
   /**
@@ -236,8 +57,6 @@ public class DefaultSmartCropper implements SmartCropper {
    */
   private static final int AO = 3;
 
-  private static final float RULE_OF_THIRDS_WEIGHT = 16.0f;
-
   public DefaultCropResult crop(BufferedImage originalImage, int aspectWidth, int aspectHeight,
       List<CropBoost> boosts) {
     // Validate our inputs
@@ -262,9 +81,10 @@ public class DefaultSmartCropper implements SmartCropper {
     // Therefore, we'll downscale the image if it's larger than 256x256 pixels.
     BufferedImage analyzeImage;
     float prescale;
-    if (isPrescale()) {
-      prescale = Math.min(Math.max(getPrescaleSize() / (float) originalImage.getWidth(),
-          getPrescaleSize() / (float) originalImage.getHeight()), 1.0f);
+    if (getOptions().isPrescale()) {
+      prescale = Math.min(
+          Math.max(getOptions().getPrescaleSize() / (float) originalImage.getWidth(),
+              getOptions().getPrescaleSize() / (float) originalImage.getHeight()), 1.0f);
       if (prescale < 1.0f) {
         // If prescale is less than 1, it means that at least one of the dimensions of the image
         // (width or height) is greater than 256 pixels. Here's the reasoning:
@@ -289,7 +109,7 @@ public class DefaultSmartCropper implements SmartCropper {
         analyzeImage = BufferedImages.scaled(originalImage,
             (int) (originalImage.getWidth() * prescale),
             (int) (originalImage.getHeight() * prescale), BufferedImage.TYPE_INT_ARGB,
-            getPrescaleAlgorithm());
+            getOptions().getPrescaleAlgorithm());
 
         cropWidth = (int) (cropWidth * prescale);
         cropHeight = (int) (cropHeight * prescale);
@@ -316,22 +136,25 @@ public class DefaultSmartCropper implements SmartCropper {
     ImageData output = new ImageData(input.width, input.height);
 
     EdgeDetection.edgeDetect(input, output);
-    SkinColoring.skinDetect(input, output, getSkinColor(), getSkinThreshold(),
-        getSkinBrightnessMin(), getSkinBrightnessMax());
-    Saturation.saturationDetect(input, output, getSaturationThreshold(),
-        getSaturationBrightnessMin(), getSaturationBrightnessMax());
+    SkinColoring.skinDetect(input, output, getOptions().getSkinColor(),
+        getOptions().getSkinThreshold(), getOptions().getSkinBrightnessMin(),
+        getOptions().getSkinBrightnessMax());
+    Saturation.saturationDetect(input, output, getOptions().getSaturationThreshold(),
+        getOptions().getSaturationBrightnessMin(),
+        getOptions().getSaturationBrightnessMax());
     Boosting.applyBoosts(output, boosts);
 
     ScoredCrop topCrop = scoreCrops(output,
         Composition.generateCandidateCrops(input.width, input.height, cropWidth, cropHeight,
-            getMinScale(), getMaxScale(), getScaleStep(), getCropSearchStep()),
-        getScoreDownSample()).stream().max(Comparator.comparing(ScoredCrop::getScore))
-        .orElseThrow();
+            getOptions().getMinScale(), getOptions().getMaxScale(),
+            getOptions().getScaleStep(), getOptions().getCropSearchStep()),
+        getOptions().getScoreDownSample()).stream()
+        .max(Comparator.comparing(ScoredCrop::getScore)).orElseThrow();
 
     System.out.println("Selected " + topCrop);
 
     BufferedImage debugImage;
-    if (isDebug()) {
+    if (getOptions().isDebug()) {
       debugImage = output.toBufferedImage();
     } else {
       debugImage = null;
@@ -372,20 +195,25 @@ public class DefaultSmartCropper implements SmartCropper {
           final int dsp = (dsy * outputWidth + dsx) * PIXEL_STRIDE;
 
           final float ospImportance = Composition.calculatePointImportance(c, osx, osy,
-              getOutsideImportance(), getEdgeRadius(), getEdgeWeight(), getRuleOfThirdsWeight());
+              getOptions().getOutsideImportance(), getOptions().getEdgeRadius(),
+              getOptions().getEdgeWeight(), getOptions().getRuleOfThirdsWeight());
 
           final float dspDetail = od[dsp + GO] / 255.0f;
 
-          skin += (od[dsp + RO] / 255.0f) * (dspDetail + getSkinBias()) * ospImportance;
+          skin += (od[dsp + RO] / 255.0f) * (dspDetail + getOptions().getSkinBias())
+              * ospImportance;
           detail += dspDetail * ospImportance;
-          saturation += (od[dsp + BO] / 255.0f) * (dspDetail + getSaturationBias()) * ospImportance;
+          saturation +=
+              (od[dsp + BO] / 255.0f) * (dspDetail + getOptions().getSaturationBias())
+                  * ospImportance;
           boost += (od[dsp + AO] / 255.0f) * ospImportance;
         }
       }
 
       final float total =
-          (detail * getDetailWeight() + skin * getSkinWeight() + saturation * getSaturationWeight()
-              + boost * getBoostWeight()) / (c.getWidth() * c.getHeight());
+          (detail * getOptions().getDetailWeight() + skin * getOptions().getSkinWeight()
+              + saturation * getOptions().getSaturationWeight()
+              + boost * getOptions().getBoostWeight()) / (c.getWidth() * c.getHeight());
 
       CropScore score = new CropScore(detail, saturation, skin, boost, total);
 
@@ -395,5 +223,9 @@ public class DefaultSmartCropper implements SmartCropper {
 
       return result;
     }).collect(toList());
+  }
+
+  private DefaultSmartCropperOptions getOptions() {
+    return options;
   }
 }

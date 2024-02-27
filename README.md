@@ -1,6 +1,6 @@
-# smartcrop4j
+# smartcrop4j [![tests](https://github.com/sigpwned/smartcrop4j/actions/workflows/tests.yml/badge.svg)](https://github.com/sigpwned/smartcrop4j/actions/workflows/tests.yml)
 
-Content-aware image cropping for Java based on the excellent [@jwagner/smartcrop.js](https://github.com/jwagner/smartcrop.js).
+Content-aware image cropping for Java 11+ based on the excellent [@jwagner/smartcrop.js](https://github.com/jwagner/smartcrop.js).
 
 ## Functionality
 
@@ -16,45 +16,24 @@ Given a `BufferedImage`, `smartcrop4j` considers the following heuristics to rec
 
 ## Quickstart
 
-To crop a loaded image, simply use:
+To produce a crop of an image of a given width and height with the default configuration, simply use:
 
-    public BufferedImage crop(BufferedImage originalImage) {
-        return Smartcrop.crop(originalImage, width, height);
+    BufferedImage croppedImage=Smartcrop.crop(originalImage, cropWidth, cropHeight);
+
+This will cause the system to choose a crop of the appropriate aspect ratio and then copy the result to a new image, possibly scaling the cropped area up or down depending on the image and crop sizes.
+
+To load an image from a file, crop it, and store the result in a new file with the same image type, all using the default configuration, use:
+
+    File croppedFile=Smartcrop.crop(imageFile, cropWidth, cropHeight);
+    try {
+        // Do some work...
+    }
+    finally {
+        croppedFile.delete();
     }
 
-To load an image from a file, crop it, and store the result in a new file with the same image type, use:
+To boost the importance of an area of the image for the purposes of crop selection, for example to incorporate information from face detection or object labeling, use:
 
-    public File crop(File originalImageFile) throws IOException {
-        String imageFileExtension=Optional.ofNullable(originalImageFile.getName())
-            .filter(f -> f.contains("."))
-            .map(f -> f.substring(f.lastIndexOf(".") + 1))
-            .orElseThrow(() -> new IllegalArgumentException("File must have extension"));
-
-        BufferedImage originalImage;
-        ImageInputStream input = ImageIO.createImageInputStream(originalImageFile);
-        if(input == null)
-            throw new IllegalArgumentException("File extension "+imageFileExtension+" is not a recognized file format");
-        try (input) {
-            originalImage = ImageIO.read(input);
-        }
-
-        BufferedImage croppedImage=Smartcrop.crop(originalImage, width, height);
-
-        File result = null;
-        File croppedImageFile=File.createTempFile("cropped.", "."+imageFileExtension);
-        try {
-            ImageOutputStream output=ImageIO.createImageOutputStream(croppedImageFile);
-            if(output == null)
-                throw new IOException("Failed to write file format "+imageFileExtension);
-            try (output) {
-                ImageIO.write(output, croppedImage);
-            }
-            result = croppedImageFile;
-        }
-        finally {
-            if(result == null)
-                croppedImageFile.delete();
-        }
-
-        return result;
-    }
+    BufferedImage croppedImage=Smartcrop.crop(originalImage, cropWidth, cropHeight, List.of(
+        new CropBoost(firstBoostX, firstBoostY, firstBoostWidth, firstBoostHeight, 1.0f),
+        new CropBoost(secondBoostX, secondBoostY, secondBoostWidth, secondBoostHeight, 0.5f)));

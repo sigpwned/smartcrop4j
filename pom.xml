@@ -9,8 +9,9 @@
   <version>0.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <inceptionYear>2024</inceptionYear>
+  <name>smartcrop4j</name>
   <description>Content-aware Image Cropping</description>
+  <inceptionYear>2024</inceptionYear>
   <url>https://github.com/sigpwned/smartcrop4j</url>
 
   <organization>

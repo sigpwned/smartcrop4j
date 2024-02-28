@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -48,6 +48,23 @@ public final class Smartcrop {
    * {@code crop(DefaultSmartCropperConfiguration.create(), originalImageFile, width, height)}.
    *
    * @param originalImageFile the original image file
+   * @param aspectRatio       the crop aspect ratio
+   * @return the cropped image file
+   * @throws IOException if the original image file cannot be read or the cropped image file cannot
+   *                     be written
+   */
+  public static File crop(File originalImageFile, float aspectRatio) throws IOException {
+    return crop(DefaultSmartCropperOptions.create(), originalImageFile, aspectRatio);
+  }
+
+  /**
+   * Crops the given image file to the given width and height using the default smart cropper. The
+   * returned image is of the same type and file format as the original image. The returned file is
+   * a temporary file that the caller should delete when it is no longer needed. Equivalent to
+   * calling
+   * {@code crop(DefaultSmartCropperConfiguration.create(), originalImageFile, width, height)}.
+   *
+   * @param originalImageFile the original image file
    * @param width             the crop width
    * @param height            the crop height
    * @return the cropped image file
@@ -57,6 +74,46 @@ public final class Smartcrop {
   public static File crop(File originalImageFile, int width, int height) throws IOException {
     return crop(DefaultSmartCropperOptions.create(), originalImageFile, width, height);
   }
+
+  /**
+   * Crops the given image file to the given width and height using the given smart cropper. The
+   * returned image is of the same type and file format as the original image. The returned file is
+   * a temporary file that the caller should delete when it is no longer needed.
+   *
+   * @param configuration     the smart cropper configuration
+   * @param originalImageFile the original image file
+   * @param aspectRatio       the crop aspect ratio
+   * @return the cropped image file
+   * @throws IOException if the original image file cannot be read or the cropped image file cannot
+   *                     be written
+   */
+  public static File crop(DefaultSmartCropperOptions configuration, File originalImageFile,
+      float aspectRatio) throws IOException {
+    String fileBasename = MoreFiles.getFileBasename(originalImageFile);
+    String fileExtension = MoreFiles.getFileExtension(originalImageFile)
+        .orElseThrow(() -> new IllegalArgumentException("originalImageFile must have extension"));
+
+    BufferedImage originalImage = ImageIO.read(originalImageFile);
+    if (originalImage == null) {
+      throw new IllegalArgumentException("originalImageFile must contain a valid image");
+    }
+
+    BufferedImage croppedImage = crop(configuration, originalImage, aspectRatio);
+
+    File result = null;
+    File croppedImageFile = File.createTempFile(fileBasename + ".", ".cropped." + fileExtension);
+    try {
+      ImageIO.write(croppedImage, fileExtension, croppedImageFile);
+      result = croppedImageFile;
+    } finally {
+      if (result == null) {
+        croppedImageFile.delete();
+      }
+    }
+
+    return result;
+  }
+
 
   /**
    * Crops the given image file to the given width and height using the given smart cropper. The

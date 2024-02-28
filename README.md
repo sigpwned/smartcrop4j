@@ -1,4 +1,5 @@
-# smartcrop4j [![tests](https://github.com/sigpwned/smartcrop4j/actions/workflows/tests.yml/badge.svg)](https://github.com/sigpwned/smartcrop4j/actions/workflows/tests.yml)
+# smartcrop4j [![tests](https://github.com/sigpwned/smartcrop4j/actions/workflows/tests.yml/badge.svg)](https://github.com/sigpwned/smartcrop4j/actions/workflows/tests.yml) [![Maven Central Version](https://img.shields.io/maven-central/v/com.sigpwned/smartcrop4j)](https://search.maven.org/search?q=g:com.sigpwned%20a:smartcrop4j)
+
 
 Content-aware image cropping for Java 11+ based on the excellent [@jwagner/smartcrop.js](https://github.com/jwagner/smartcrop.js).
 

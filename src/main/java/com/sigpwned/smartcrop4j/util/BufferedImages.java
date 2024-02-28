@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,6 +26,7 @@
 package com.sigpwned.smartcrop4j.util;
 
 import com.sigpwned.smartcrop4j.Crop;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -40,6 +41,12 @@ public final class BufferedImages {
    * By default, use bilinear interpolation, which is a good compromise between speed and quality.
    */
   public static final Object DEFAULT_INTERPOLATION_STYLE = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+
+  /**
+   * By default, use the AWT-default rendering style, which is a good compromise between speed and
+   * quality.
+   */
+  public static final Object DEFAULT_RENDERING_STYLE = RenderingHints.VALUE_RENDER_DEFAULT;
 
   /**
    * Scales the given image to the given dimensions using the given type. The returned image is of
@@ -113,17 +120,39 @@ public final class BufferedImages {
   }
 
   /**
-   * Crops the given image to the given region and scales it to the given dimensions using the
-   * default interpolation style. The returned image is of the given type. Equivalent to calling
+   * Crops the given image to the given region and scales it to the given dimensions without a
+   * background color. The returned image is of the given type. Equivalent to calling
    * {@code cropped(image, region, newWidth, newHeight, newType, null)}.
    *
-   * @see #cropped(BufferedImage, Crop, int, int, int)
-   * @see #DEFAULT_INTERPOLATION_STYLE
+   * @see #cropped(BufferedImage, Crop, int, int, int, Color)
    */
   public static BufferedImage cropped(BufferedImage image, Crop region, int newWidth, int newHeight,
       int newType) {
     return cropped(image, region, newWidth, newHeight, newType, null);
   }
+
+  /**
+   * Crops the given image to the given region and scales it to the given dimensions using the given
+   * background color and default rendering styles. The returned image is of the given type.
+   * Equivalent to calling
+   * {@code cropped(image, region, newWidth, newHeight, newType, backgroundColor, null, null)}.
+   *
+   * @param image           the image to crop
+   * @param region          the region to crop
+   * @param newWidth        the new width
+   * @param newHeight       the new height
+   * @param newType         the new type
+   * @param backgroundColor the background color
+   * @return the cropped and scaled image
+   * @see #cropped(BufferedImage, Crop, int, int, int, Color, Object, Object)
+   * @see #DEFAULT_RENDERING_STYLE
+   * @see #DEFAULT_INTERPOLATION_STYLE
+   */
+  public static BufferedImage cropped(BufferedImage image, Crop region, int newWidth, int newHeight,
+      int newType, Color backgroundColor) {
+    return cropped(image, region, newWidth, newHeight, newType, backgroundColor, null, null);
+  }
+
 
   /**
    * Crops the given image to the given region and scales it to the given dimensions using the given
@@ -134,18 +163,34 @@ public final class BufferedImages {
    * @param newWidth           the new width
    * @param newHeight          the new height
    * @param newType            the new type
+   * @param backgroundColor    the background color
+   * @param renderingStyle     the rendering style
    * @param interpolationStyle the interpolation style
    * @return the cropped and scaled image
    */
   public static BufferedImage cropped(BufferedImage image, Crop region, int newWidth, int newHeight,
-      int newType, Object interpolationStyle) {
+      int newType, Color backgroundColor, Object renderingStyle, Object interpolationStyle) {
+    if (renderingStyle == null) {
+      renderingStyle = DEFAULT_RENDERING_STYLE;
+    }
+    if (interpolationStyle == null) {
+      interpolationStyle = DEFAULT_INTERPOLATION_STYLE;
+    }
+
     final BufferedImage result = new BufferedImage(newWidth, newHeight, newType);
 
     final Graphics2D g = result.createGraphics();
     try {
-      g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-          Optional.ofNullable(interpolationStyle).orElse(DEFAULT_INTERPOLATION_STYLE));
-      g.drawImage(image, region.getX(), region.getY(), region.getWidth(), region.getHeight(), null);
+      g.setRenderingHint(RenderingHints.KEY_RENDERING, renderingStyle);
+      g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolationStyle);
+      if (backgroundColor != null) {
+        g.drawImage(image, 0, 0, newWidth, newHeight, region.getX(), region.getY(),
+            region.getX() + region.getWidth(), region.getY() + region.getHeight(), backgroundColor,
+            null);
+      } else {
+        g.drawImage(image, 0, 0, newWidth, newHeight, region.getX(), region.getY(),
+            region.getX() + region.getWidth(), region.getY() + region.getHeight(), null);
+      }
     } finally {
       g.dispose();
     }

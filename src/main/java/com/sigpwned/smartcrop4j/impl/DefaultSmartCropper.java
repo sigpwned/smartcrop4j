@@ -131,9 +131,10 @@ public class DefaultSmartCropper implements SmartCropper {
         // Therefore, if prescale is less than 1, it indicates that scaling down is necessary for at
         // least one dimension of the image to fit within a 256-pixel size constraint, implying that
         // either imageWidth or imageHeight (or both) is larger than 256 pixels.
+        // TODO Add prescaleRenderingStyle?
         analyzeImage = BufferedImages.scaled(originalImage,
             (int) (originalImage.getWidth() * prescale),
-            (int) (originalImage.getHeight() * prescale), BufferedImage.TYPE_INT_ARGB,
+            (int) (originalImage.getHeight() * prescale), BufferedImage.TYPE_INT_ARGB, null, null,
             getOptions().getPrescaleAlgorithm());
 
         cropWidth = (int) (cropWidth * prescale);
@@ -165,15 +166,13 @@ public class DefaultSmartCropper implements SmartCropper {
         getOptions().getSkinThreshold(), getOptions().getSkinBrightnessMin(),
         getOptions().getSkinBrightnessMax());
     Saturation.saturationDetect(input, output, getOptions().getSaturationThreshold(),
-        getOptions().getSaturationBrightnessMin(),
-        getOptions().getSaturationBrightnessMax());
+        getOptions().getSaturationBrightnessMin(), getOptions().getSaturationBrightnessMax());
     Boosting.applyBoosts(output, boosts);
 
     ScoredCrop topCrop = scoreCrops(output,
         Composition.generateCandidateCrops(input.width, input.height, cropWidth, cropHeight,
-            getOptions().getMinScale(), getOptions().getMaxScale(),
-            getOptions().getScaleStep(), getOptions().getCropSearchStep()),
-        getOptions().getScoreDownSample()).stream()
+            getOptions().getMinScale(), getOptions().getMaxScale(), getOptions().getScaleStep(),
+            getOptions().getCropSearchStep()), getOptions().getScoreDownSample()).stream()
         .max(Comparator.comparing(ScoredCrop::getScore)).orElseThrow();
 
     BufferedImage debugImage;
@@ -223,12 +222,11 @@ public class DefaultSmartCropper implements SmartCropper {
 
           final float dspDetail = od[dsp + GO] / 255.0f;
 
-          skin += (od[dsp + RO] / 255.0f) * (dspDetail + getOptions().getSkinBias())
-              * ospImportance;
+          skin +=
+              (od[dsp + RO] / 255.0f) * (dspDetail + getOptions().getSkinBias()) * ospImportance;
           detail += dspDetail * ospImportance;
-          saturation +=
-              (od[dsp + BO] / 255.0f) * (dspDetail + getOptions().getSaturationBias())
-                  * ospImportance;
+          saturation += (od[dsp + BO] / 255.0f) * (dspDetail + getOptions().getSaturationBias())
+              * ospImportance;
           boost += (od[dsp + AO] / 255.0f) * ospImportance;
         }
       }

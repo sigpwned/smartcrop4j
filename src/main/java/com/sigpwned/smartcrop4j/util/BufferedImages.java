@@ -30,7 +30,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.util.Optional;
 
 public final class BufferedImages {
 
@@ -62,12 +61,26 @@ public final class BufferedImages {
 
   /**
    * Scales the given image to the given dimensions using the given type. Equivalent to calling
-   * {@code scaled(image, newWidth, newHeight, type, null)}.
+   * {@code scaled(image, newWidth, newHeight, newType, null)}.
    *
-   * @see #scaled(BufferedImage, int, int, int, Object)
+   * @see #scaled(BufferedImage, int, int, int, Color)
    */
-  public static BufferedImage scaled(BufferedImage image, int newWidth, int newHeight, int type) {
-    return scaled(image, newWidth, newHeight, type, null);
+  public static BufferedImage scaled(BufferedImage image, int newWidth, int newHeight,
+      int newType) {
+    return scaled(image, newWidth, newHeight, newType, null);
+  }
+
+  /**
+   * Scales the given image to the given dimensions using the given type. Equivalent to calling
+   * {@code scaled(image, newWidth, newHeight, newType, backgroundColor, null, null)}.
+   *
+   * @see #scaled(BufferedImage, int, int, int, Color, Object, Object)
+   * @see #DEFAULT_RENDERING_STYLE
+   * @see #DEFAULT_INTERPOLATION_STYLE
+   */
+  public static BufferedImage scaled(BufferedImage image, int newWidth, int newHeight, int newType,
+      Color backgroundColor) {
+    return scaled(image, newWidth, newHeight, newType, backgroundColor, null, null);
   }
 
   /**
@@ -76,19 +89,34 @@ public final class BufferedImages {
    * @param image              the image to scale
    * @param newWidth           the new width
    * @param newHeight          the new height
-   * @param type               the type
+   * @param newType            the new image type
+   * @param backgroundColor    the background color
+   * @param renderingStyle     the rendering style
    * @param interpolationStyle the interpolation style
    * @return the scaled image
    */
-  public static BufferedImage scaled(BufferedImage image, int newWidth, int newHeight, int type,
-      Object interpolationStyle) {
-    final BufferedImage result = new BufferedImage(newWidth, newHeight, type);
+  public static BufferedImage scaled(BufferedImage image, int newWidth, int newHeight, int newType,
+      Color backgroundColor, Object renderingStyle, Object interpolationStyle) {
+    if (renderingStyle == null) {
+      renderingStyle = DEFAULT_RENDERING_STYLE;
+    }
+    if (interpolationStyle == null) {
+      interpolationStyle = DEFAULT_INTERPOLATION_STYLE;
+    }
+
+    final BufferedImage result = new BufferedImage(newWidth, newHeight, newType);
 
     final Graphics2D g = result.createGraphics();
     try {
-      g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-          Optional.ofNullable(interpolationStyle).orElse(DEFAULT_INTERPOLATION_STYLE));
-      g.drawImage(image, 0, 0, newWidth, newHeight, null);
+      g.setRenderingHint(RenderingHints.KEY_RENDERING, renderingStyle);
+      g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolationStyle);
+      if (backgroundColor != null) {
+        g.drawImage(image, 0, 0, newWidth, newHeight, 0, 0, image.getWidth(), image.getHeight(),
+            backgroundColor, null);
+      } else {
+        g.drawImage(image, 0, 0, newWidth, newHeight, 0, 0, image.getWidth(), image.getHeight(),
+            null);
+      }
     } finally {
       g.dispose();
     }
@@ -137,13 +165,6 @@ public final class BufferedImages {
    * Equivalent to calling
    * {@code cropped(image, region, newWidth, newHeight, newType, backgroundColor, null, null)}.
    *
-   * @param image           the image to crop
-   * @param region          the region to crop
-   * @param newWidth        the new width
-   * @param newHeight       the new height
-   * @param newType         the new type
-   * @param backgroundColor the background color
-   * @return the cropped and scaled image
    * @see #cropped(BufferedImage, Crop, int, int, int, Color, Object, Object)
    * @see #DEFAULT_RENDERING_STYLE
    * @see #DEFAULT_INTERPOLATION_STYLE

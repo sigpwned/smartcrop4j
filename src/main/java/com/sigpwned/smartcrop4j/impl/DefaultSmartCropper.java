@@ -169,11 +169,19 @@ public class DefaultSmartCropper implements SmartCropper {
         getOptions().getSaturationBrightnessMin(), getOptions().getSaturationBrightnessMax());
     Boosting.applyBoosts(output, boosts);
 
+    final float finalPrescale = prescale;
     ScoredCrop topCrop = scoreCrops(output,
         Composition.generateCandidateCrops(input.width, input.height, cropWidth, cropHeight,
             getOptions().getMinScale(), getOptions().getMaxScale(), getOptions().getScaleStep(),
             getOptions().getCropSearchStep()), getOptions().getScoreDownSample()).stream()
-        .max(Comparator.comparing(ScoredCrop::getScore)).orElseThrow();
+        .max(Comparator.comparing(ScoredCrop::getScore))
+        .map(c -> new ScoredCrop(
+            (int) (c.getX() / finalPrescale),
+            (int) (c.getY() / finalPrescale),
+            (int) (c.getWidth() / finalPrescale),
+            (int) (c.getHeight() / finalPrescale),
+            c.getScore()))
+        .orElseThrow();
 
     BufferedImage debugImage;
     if (getOptions().isDebug()) {
